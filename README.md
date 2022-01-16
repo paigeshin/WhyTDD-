@@ -1,5 +1,3 @@
-# WhyTDD-
-
 ### Process
 
 1. Write a failing test 
@@ -59,3 +57,79 @@ func test_AssignUserToBankAccount() {
 - Automatic
 - Repeatable
 - Readable
+
+### Code to be tested
+
+```swift
+//
+//  Account.swift
+//  FirstUnitTest
+//
+//  Created by paige on 2022/01/16.
+//
+
+import Foundation
+
+enum AccountError: Error {
+    case insufficientFunds
+}
+
+struct Account {
+    
+    var balance: Double = 0.0
+    
+    mutating func deposit(_ amount: Double) {
+        self.balance += amount
+    }
+    
+    mutating func withdraw(_ amount: Double) throws {
+        let netBalance = self.balance - amount
+        if netBalance < 0 {
+            throw AccountError.insufficientFunds
+        } else {
+            self.balance -= amount
+        }
+    }
+    
+}
+```
+
+```swift
+import XCTest
+@testable import FirstUnitTest
+
+class FirstUnitTestTests: XCTestCase {
+
+    private var account: Account!
+    
+    // this function is called BEFORE each test
+    override func setUp() {
+        super.setUp()
+        self.account = Account()
+    }
+    
+    func test_WidthdrawFromInsufficientBalance() {
+        self.account.deposit(100)
+        XCTAssertThrowsError(try self.account.withdraw(300)) { error in
+            XCTAssertEqual(error as! AccountError, AccountError.insufficientFunds)
+        }
+    }
+    
+    func test_InitialBalanceZero() {
+        XCTAssertTrue(account.balance == 0, "Balance is not zero!")
+        
+    }
+    
+    func test_DepositFunds() {
+        account.deposit(100)
+        XCTAssertEqual(100, account.balance)
+    }
+    
+    override class func tearDown() {
+        super.tearDown()
+        
+        // this function is called AFTER each test
+    }
+    
+}
+```
